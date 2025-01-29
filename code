@@ -1,0 +1,26 @@
+from flask import Flask, abort
+import json
+
+app = Flask(__name__)
+
+with open('dishes.json', 'r') as file:
+    data = json.load(file)
+
+@app.route('/stop/<dish>/', methods=['GET'])
+def check_dish(dish):
+    dish = dish.replace('%20', ' ')  # Заменить %20 на пробел
+
+    if dish not in data['recipes']:
+        abort(404)
+
+    required_ingredients = data['recipes'][dish]
+    available_ingredients = data['available']
+
+    if all(item in available_ingredients for item in required_ingredients):
+        return f'"{dish}" available', 200
+    else:
+        return f'"{dish}" stop', 200
+
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8080, debug=False)
